@@ -6,18 +6,32 @@
 //
 
 import UIKit
+import SDWebImage
 
 class NewsStoryTableViewCell: UITableViewCell {
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    
+    static let identifier = "NewsStoryTableViewCell"
+    
+    static let preferedHeight: CGFloat = 140
+    
+    struct ViewModel{
+        let source: String
+        let headline: String
+        let dataString: String
+        let imageUrl: URL?
+        
+        init(model: NewsStory){
+            self.source = model.source
+            self.headline = model.headline
+            self.dataString = .string(from: model.datetime)
+            self.imageUrl = URL(string: model.image)
+        }
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
+    
+    //Source
+    private let sourceLabel: UILabel = {
+       let label = UILabel()
+        return label
+    }()
 
 }

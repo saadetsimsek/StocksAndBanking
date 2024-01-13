@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StockChart: UIView {
+class StockChartView: UIView {
 
     /*
     // Only override draw() if you perform custom drawing.
