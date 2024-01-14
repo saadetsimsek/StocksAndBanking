@@ -82,17 +82,19 @@ extension NewsViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: NewsStoryTableViewCell.identifier, for: indexPath) as? NewsStoryTableViewCell else {
             fatalError()
         }
-        cell.textLabel?.text = "yaa"
+        cell.configure(with: .init(model: stories[indexPath.row]))
         return cell
     }
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let header = tableView.dequeueReusableCell(withIdentifier: NewsHeaderView.identifier) as? NewsHeaderView else {
             return nil
         }
+        header.configure(with: .init(title: self.type.title, shouldShowAddButton: false))
+        return header
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return NewsStoryTableViewCell.prefedHeight
+        return NewsStoryTableViewCell.preferedHeight
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
