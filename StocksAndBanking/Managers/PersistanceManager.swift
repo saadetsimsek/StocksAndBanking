@@ -22,7 +22,7 @@ final class PersistanceManager {
         
     }
     
-    //MARK: - Init
+    //MARK: - Public 
     public var watchlist: [String]{
         if !hasOnboarded{
             userDefaults.setValue(true, forKey: Constants.onboardedKey)

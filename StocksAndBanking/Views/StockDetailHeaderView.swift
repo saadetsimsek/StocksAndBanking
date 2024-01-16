@@ -48,9 +48,23 @@ class StockDetailHeaderView: UIView {
                                  y: 0,
                                  width: width,
                                  height: height-100)
+        CollectionView.frame = CGRect(x: 0,
+                                      y: height-100,
+                                      width: width,
+                                      height: 100)
+    }
+    
+    func configure(chartViewMode: StockChartView.ViewModel,
+                   metricViewModels: [MetricCollectionViewCell.ViewModel]){
+        //Update chart
+        chartView.configure(with: chartViewMode) // şemayı güncelle
+        self.metricViewModels = metricViewModels // metrik veri modellerini güncelle
+        CollectionView.reloadData() // koleksiyon görünümünü yeniden yükle
     }
     
 }
+
+//MARK: - Collection View
 
 extension StockDetailHeaderView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
@@ -63,7 +77,7 @@ extension StockDetailHeaderView: UICollectionViewDelegate, UICollectionViewDataS
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MetricCollectionViewCell.identifier, for: indexPath) as? MetricCollectionViewCell else {
             fatalError()
         }
-        
+        cell.configure(with: viewModel)
         return cell
     }
     

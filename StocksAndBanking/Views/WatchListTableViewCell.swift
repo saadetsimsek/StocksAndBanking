@@ -24,8 +24,8 @@ class WatchListTableViewCell: UITableViewCell {
         let companyName: String
         let price: String // formatted
         let changeColor: UIColor // red or green
-        let changePergentage: String // formatted
-     //   let chartViewModel: StockChartView.viewModel
+        let changePercentage: String // formatted
+        let chartViewModel: StockChartView.ViewModel
     }
     
     //Symbol label
@@ -135,17 +135,17 @@ class WatchListTableViewCell: UITableViewCell {
         nameLabel.text = nil
         priceLabel.text = nil
         changeLabel.text = nil
-     //   miniChartView.reset()
+        miniChartView.reset()
     }
     
     public func configure(with viewModel: ViewModel) {
         symbolLabel.text = viewModel.symbol
         nameLabel.text = viewModel.companyName
         priceLabel.text = viewModel.price
-        changeLabel.text = viewModel.changePergentage
+        changeLabel.text = viewModel.changePercentage
         changeLabel.backgroundColor = viewModel.changeColor
         //Configure chart
-    //    miniChartView.configure(with: viewModel.chartViewModel)
+        miniChartView.configure(with: viewModel.chartViewModel)
     }
 
 }

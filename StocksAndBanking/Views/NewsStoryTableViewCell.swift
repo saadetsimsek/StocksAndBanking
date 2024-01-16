@@ -98,7 +98,11 @@ class NewsStoryTableViewCell: UITableViewCell {
         sourceLabel.frame = CGRect(x: separatorInset.left,
                                    y: 4,
                                    width: availableWidth,
-                                   height: contentView.height - sourceLabel.bottom - dateLabel.height - 10)
+                                   height: sourceLabel.height)
+        headlineLabel.frame = CGRect(x: separatorInset.left,
+                                     y: sourceLabel.bottom + 2,
+                                     width: availableWidth,
+                                     height: contentView.height - sourceLabel.bottom - dateLabel.height - 10)
     }
     
     override func prepareForReuse() {

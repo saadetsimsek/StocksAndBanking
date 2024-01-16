@@ -5,8 +5,9 @@
 //  Created by Saadet Şimşek on 09/01/2024.
 //
 
-import UIKit
 import Charts
+import UIKit
+
 
 ///View to show a chart
 final class StockChartView: UIView {

@@ -163,7 +163,7 @@ extension UIView{
 }
 
 //MARK: - CandleStick Sorting
-/*
+
 extension Array where Element == CandleStick {
     func getPercentage() -> Double {
         // Dizinin ilk elemanının tarihini al
@@ -182,4 +182,4 @@ extension Array where Element == CandleStick {
         return diff
     }
 }
-*/
+

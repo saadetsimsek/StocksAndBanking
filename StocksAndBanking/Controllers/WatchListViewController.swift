@@ -6,19 +6,26 @@
 //
 
 import UIKit
-//import FloatingPanel
+import FloatingPanel
 
 class WatchListViewController: UIViewController {
+    
+    private var searchTimer: Timer?
     
     static var maxChangeWidth: CGFloat = 0
     
     private var viewModels: [WatchListTableViewCell.ViewModel] = []
+    
+    ///Model
+    private var watchlistMap: [String:[CandleStick]] = [:]
     
     private let tableView: UITableView = {
         let table = UITableView()
         table.register(WatchListTableViewCell.self, forCellReuseIdentifier: WatchListTableViewCell.identifier)
         return table
     }()
+    
+    private var observer: NSObjectProtocol?
 
     //MARK: - Lifecycle
     
@@ -55,6 +62,9 @@ extension WatchListViewController: UITableViewDelegate, UITableViewDataSource {
       //  cell.delegate = self
         cell.textLabel?.text = "heyy"
         return cell
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return WatchListTableViewCell.prefferedHeight
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {

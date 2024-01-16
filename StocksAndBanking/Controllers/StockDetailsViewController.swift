@@ -18,7 +18,10 @@ class StockDetailsViewController: UIViewController {
     private let companyName: String
     private var candleStickData: [CandleStick]
     
+    //symbol, company name, chart data
     
+    
+    //MARK: - Properties
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(NewsHeaderView.self, forHeaderFooterViewReuseIdentifier: NewsHeaderView.identifier)
@@ -32,7 +35,7 @@ class StockDetailsViewController: UIViewController {
     
     //MARK: - Init
     
-    init(symbol: String, companyName: String, candleStickData: [CandleStick] = []) {
+    init(symbol: String, companyName: String, candleStickData: [CandleStick]=[]) {
         self.symbol = symbol
         self.companyName = companyName
         self.candleStickData = candleStickData
@@ -44,11 +47,15 @@ class StockDetailsViewController: UIViewController {
     }
     
     //MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = companyName
+        setUpTable()
+        setUpCloseButton()
+        setUpCloseButton()
+        
         
     }
     
@@ -77,84 +84,98 @@ class StockDetailsViewController: UIViewController {
                                                          height: (view.width * 0.7) + 100))// tableView üzerine view ekleyerek ekranı bölme
     }
     
-    private func renderChart(){
+    private func renderChart(){ // grafik görünümünü oluşturmak ve görüntülemek için kullanılır
         // Chart VM ! FinancialMetricViewModel(s)
         let headerView = StockDetailHeaderView(frame: CGRect(x: 0,
                                                              y: 0,
                                                              width: view.width,
                                                              height: (view.width *  0.7) + 100))
-        
-        
-        
+        var viewModels = [MetricCollectionViewCell.ViewModel]()
+        if let metrics {
+            viewModels.append(.init(name: "52W High", value: "\(metrics.the52WeekHigh)"))
+            viewModels.append(.init(name: "52L High", value: "\(metrics.the52WeekLow)"))
+            viewModels.append(.init(name: "52W Return", value: "\(metrics.the52WeekPriceReturnDaily)"))
+            viewModels.append(.init(name: "Beta", value: "\(metrics.beta)"))
+            viewModels.append(.init(name: "10D Vol.", value: "\(metrics.the10DayAverageTradingVolume)"))
+        }
         
         //Configure
-       
-    }
-
-  
-}
-
-extension StockDetailsViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return stories.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: NewsStoryTableViewCell.identifier, for: indexPath) as? NewsStoryTableViewCell else {
-            fatalError()
-        }
-        cell.configure(with: .init(model: stories[indexPath.row]))
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return NewsStoryTableViewCell.preferedHeight
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: NewsHeaderView.identifier) as? NewsHeaderView else{
-            return nil
-        }
-        header.delegate = self
-        header.configure(with: .init(title: symbol.uppercased(), shouldShowAddButton: !PersistanceManager.shared.watchListContains(symbol: symbol)))
-        // Sadece wathlistte zaten yoksa ekle butonu göstermek için persistent managerden fonksiyon yazdık
-        return header
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return NewsHeaderView.preferedHeight
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        guard let url = URL(string: stories[indexPath.row].url) else {
-            return
-        }
+        let change = candleStickData.getPercentage()
+            headerView.configure(
+                chartViewMode: .init(
+                    data: candleStickData.reversed().map {$0.close},
+                    showLegend: true,
+                    showAxis: true,
+                    fillColor: change < 0 ? .systemRed : .systemGreen),
+                metricViewModels: viewModels
+            )
+            tableView.tableHeaderView = headerView
         
-        let vc = SFSafariViewController(url: url)
-        present(vc, animated: true)
     }
 }
-
-extension StockDetailsViewController: NewsHeaderViewDelegate {
-    func newsHeaderViewDidTapAddButton(_ headerView: NewsHeaderView) {
+    
+    extension StockDetailsViewController: UITableViewDelegate, UITableViewDataSource {
         
-        headerView.button.isHidden = true
-        PersistanceManager.shared.addToWatchlist(symbol: symbol, companyName: companyName)
+        func numberOfSections(in tableView: UITableView) -> Int {
+            return 1
+        }
         
-        let alert = UIAlertController(title: "Added to your Watchlist",
-                                      message: "We've added \(companyName) to your watchlist",
-                                      preferredStyle: .alert )
-        alert.addAction(UIAlertAction(title: "Dismiss",
-                                      style: .cancel,
-                                      handler: nil))
-        present(alert, animated: true)
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return stories.count
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: NewsStoryTableViewCell.identifier, for: indexPath) as? NewsStoryTableViewCell else {
+                fatalError()
+            }
+            cell.configure(with: .init(model: stories[indexPath.row]))
+            return cell
+        }
+        
+        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+            return NewsStoryTableViewCell.preferedHeight
+        }
+        
+        func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+            guard let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: NewsHeaderView.identifier) as? NewsHeaderView else{
+                return nil
+            }
+            header.delegate = self
+            header.configure(with: .init(title: symbol.uppercased(), shouldShowAddButton: !PersistanceManager.shared.watchListContains(symbol: symbol)))
+            // Sadece wathlistte zaten yoksa ekle butonu göstermek için persistent managerden fonksiyon yazdık
+            return header
+        }
+        
+        func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+            return NewsHeaderView.preferedHeight
+        }
+        
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            tableView.deselectRow(at: indexPath, animated: true)
+            guard let url = URL(string: stories[indexPath.row].url) else {
+                return
+            }
+            
+            let vc = SFSafariViewController(url: url)
+            present(vc, animated: true)
+        }
     }
     
-    
-}
+    extension StockDetailsViewController: NewsHeaderViewDelegate {
+        func newsHeaderViewDidTapAddButton(_ headerView: NewsHeaderView) {
+            
+            headerView.button.isHidden = true
+            PersistanceManager.shared.addToWatchlist(symbol: symbol, companyName: companyName)
+            
+            let alert = UIAlertController(title: "Added to your Watchlist",
+                                          message: "We've added \(companyName) to your watchlist",
+                                          preferredStyle: .alert )
+            alert.addAction(UIAlertAction(title: "Dismiss",
+                                          style: .cancel,
+                                          handler: nil))
+            present(alert, animated: true)
+        }
+        
+        
+    }
+
