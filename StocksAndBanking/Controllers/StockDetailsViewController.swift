@@ -54,7 +54,8 @@ class StockDetailsViewController: UIViewController {
         title = companyName
         setUpTable()
         setUpCloseButton()
-        setUpCloseButton()
+        fetchFinancialData()
+        fetchNews()
         
         
     }
@@ -82,6 +83,56 @@ class StockDetailsViewController: UIViewController {
                                                          y: 0,
                                                          width: view.width,
                                                          height: (view.width * 0.7) + 100))// tableView üzerine view ekleyerek ekranı bölme
+    }
+    
+    private func fetchFinancialData(){
+        let group = DispatchGroup()
+        
+        if candleStickData.isEmpty{
+            group.enter()
+            APICaller.shared.marketData(for: symbol) { [weak self] result in
+                defer {
+                    group.leave()
+                }
+                switch result {
+                case .success(let response):
+                    self?.candleStickData = response.candleSticks
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
+        group.enter()
+        
+        APICaller.shared.financialMetrics(for: symbol) { [weak self] result in
+            defer{
+                group.leave()
+            }
+            switch result {
+            case .success(let response):
+                let metrics = response.metric
+                self?.metrics = metrics
+            case .failure(let error):
+                print(error)
+            }
+        }
+        group.notify(queue: .main) { [weak self] in
+            self?.renderChart()
+        }
+    }
+    
+    private func fetchNews(){
+        APICaller.shared.news(for: .company(symbol: symbol)) { [weak self] result in
+            switch result {
+            case .success(let stories):
+                DispatchQueue.main.asyncAndWait {
+                    self?.stories = stories
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
     
     private func renderChart(){ // grafik görünümünü oluşturmak ve görüntülemek için kullanılır

@@ -167,7 +167,7 @@ extension UIView{
 extension Array where Element == CandleStick {
     func getPercentage() -> Double {
         // Dizinin ilk elemanının tarihini al
-        let latestDate = self[0].date
+        let latestDate = self[1].date
         // Dizinin ilk elemanının kapanış fiyatını al
         guard let latestClose = self.first?.close,
               // Dizideki ilk öğeyi bul ve tarihleri karşılaştırarak aynı gün olmayanı seç

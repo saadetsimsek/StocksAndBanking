@@ -51,6 +51,7 @@ class NewsViewController: UIViewController {
         super.viewDidLoad()
 
         setUpTable()
+        fetchNews()
         
     }
     
@@ -64,6 +65,21 @@ class NewsViewController: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+    }
+    
+    private func fetchNews(){
+        
+        APICaller.shared.news(for: type) { [weak self] result in
+            switch result {
+            case .success(let stories):
+                DispatchQueue.main.async{
+                    self?.stories = stories
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
     
     private func open(url: URL){
@@ -86,8 +102,8 @@ extension NewsViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard let header = tableView.dequeueReusableCell(withIdentifier: NewsHeaderView.identifier) as? NewsHeaderView else {
-            return nil
+        guard let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: NewsHeaderView.identifier) as? NewsHeaderView else{
+            return nil 
         }
         header.configure(with: .init(title: self.type.title, shouldShowAddButton: false))
         return header
